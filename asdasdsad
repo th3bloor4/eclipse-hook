@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EclipseHook</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400&display=swap');
+        
+        :root {
+            --primary-color: #ffffff;
+            --secondary-color: #d9b3ff;
+            --accent-color: #d9b3ff;
+            --bg-color: #1a0033;
+            --card-bg: #2a004d;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--primary-color);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            padding: 40px 0;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 1000;
+            letter-spacing: 4px;
+            color: var(--accent-color);
+            transition: var(--transition);
+        }
+        
+        .logo:hover {
+            opacity: 0.8;
+        }
+        
+        nav {
+            display: flex;
+            align-items: center;
+        }
+        
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .main-nav ul li {
+            margin: 0 15px;
+        }
+        
+        .main-nav ul li a {
+            text-decoration: none;
+            color: var(--secondary-color);
+            font-size: 1rem;
+            letter-spacing: 1px;
+            position: relative;
+            transition: var(--transition);
+            display: inline-block;
+            text-align: center;
+            padding: 5px 0;
+        }
+        
+        .main-nav ul li a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--accent-color);
+            transition: var(--transition);
+        }
+        
+        .main-nav ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        .main-nav ul li a:hover:after {
+            width: 100%;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+            margin-left: 30px;
+        }
+        
+        .auth-btn {
+            padding: 8px 20px;
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        .auth-btn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+        
+        .auth-btn.register {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+        
+        .auth-btn.register:hover {
+            background-color: transparent;
+            color: var(--accent-color);
+        }
+        
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--secondary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary-color);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #3d0066;
+            border-radius: 5px;
+            background-color: #1a0033;
+            color: var(--primary-color);
+        }
+        
+        .form-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .form-submit:hover {
+            opacity: 0.9;
+        }
+        
+        .form-footer {
+            margin-top: 20px;
+            text-align: center;
+            color: var(--secondary-color);
+        }
+        
+        .form-footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            display: none;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+        
+        .user-name {
+            color: var(--accent-color);
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        /* Остальные стили */
+        .hero {
+            height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a0033 0%, #330066 100%);
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            border-radius: 30px;
+        }
+        
+        .btn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+        
+        section {
+            padding: 100px 0;
+            display: none;
+        }
+        
+        section.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            color: var(--primary-color);
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background-color: var(--accent-color);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .service-card {
+            padding: 30px;
+            border: 1px solid #3d0066;
+            transition: var(--transition);
+            border-radius: 10px;
+            background-color: var(--card-bg);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(217, 179, 255, 0.3);
+            border-color: var(--accent-color);
+        }
+        
+        .service-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .service-card p {
+            color: var(--secondary-color);
+        }
+        
+        .contact-info {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .contact-info p {
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+        
+        footer {
+            background-color: #0d001a;
+            color: white;
+            padding: 50px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-logo {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-links a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .copyright {
+            color: #7a5c99;
+            font-size: 0.9rem;
+        }
+        
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(217, 179, 255, 0.05);
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+            }
+            
+            nav {
+                flex-direction: column;
+                margin-top: 20px;
+            }
+            
+            .auth-buttons {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            
+            .main-nav ul {
+                flex-direction: column;
+            }
+            
+            .main-nav ul li {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">EclipseHook</div>
+            <nav>
+                <div class="main-nav">
+                    <ul>
+                        <li><a href="#" class="nav-link" data-section="about">Главная</a></li>
+                        <li><a href="#" class="nav-link" data-section="services">Услуги</a></li>
+                        <li><a href="#" class="nav-link" data-section="contacts">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="auth-buttons" id="authButtons">
+                    <a href="#" class="auth-btn login-btn" id="loginBtn">Войти</a>
+                    <a href="#" class="auth-btn register" id="registerBtn">Регистрация</a>
+                </div>
+                <div class="user-profile" id="userProfile">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <span class="user-name" id="userName"></span>
+                    <button class="logout-btn" id="logoutBtn">Выйти</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Модальное окно входа -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeLogin">&times;</span>
+            <h2>Вход в аккаунт</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Пароль</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="form-submit">Войти</button>
+                <div class="form-footer">
+                    Нет аккаунта? <a href="#" id="showRegister">Зарегистрироваться</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Модальное окно регистрации -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeRegister">&times;</span>
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Имя</label>
+                    <input type="text" id="registerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Пароль</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <button type="submit" class="form-submit">Зарегистрироваться</button>
+                <div class="form-footer">
+                    Уже есть аккаунт? <a href="#" id="showLogin">Войти</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <section id="home" class="hero active">
+        <div class="bg-animation">
+            <div class="bg-circle" style="width: 301230px; height: 301230px; left: 110%; top: 210%;"></div>
+            <div class="bg-circle" style="width: 201230px; height: 212300px; left: 710%; top: 510%;"></div>
+            <div class="bg-circle" style="width: 151230px; height: 151230px; left: 310%; top: 710%;"></div>
+            <div class="bg-circle" style="width: 251230px; height: 251230px; left: 601%; top: 110%;"></div>
+        </div>
+        <div class="hero-content">
+            <h1>Eclipsehook lua</h1>
+            <p>EclipseHook offers the best selection in the hvh community</p>
+            <a href="#" class="btn nav-link" data-section="services">Наши услуги</a>
+        </div>
+    </section>
+    
+    
+    <section id="services" class="services">
+        <div class="container">
+            <h2 class="section-title">Услуги</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>Веб-разработка</h3>
+                    <p>Создание современных веб-приложений с темным интерфейсом и адаптивным дизайном.</p>
+                </div>
+                <div class="service-card">
+                    <h3>UI/UX Дизайн</h3>
+                    <p>Проектирование удобных интерфейсов с акцентом на темные цветовые схемы.</p>
+                </div>
+                <div class="service-card">
+                    <h3>Брендинг</h3>
+                    <p>Разработка уникального стиля компании с использованием глубоких фиолетовых оттенков.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="contacts" class="contacts">
+        <div class="container">
+            <h2 class="section-title">Contacts</h2>
+            <div class="contact-info">
+                <p>We are always open for cooperation.</p>
+                <p><strong>Email:</strong> eclipsehooklua@gmail.com</p>
+                <p><strong>Discord:</strong> dsc.gg/eclipse-hook   </p>
+                <p><strong>Telegram:</strong> t.me/npumer   </p>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">EclipseHook</div>
+                <div class="footer-links">
+                </div>
+                <p class="copyright">© 2025 EclipseHook. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Элементы аутентификации
+            const authButtons = document.getElementById('authButtons');
+            const userProfile = document.getElementById('userProfile');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+            const closeLogin = document.getElementById('closeLogin');
+            const closeRegister = document.getElementById('closeRegister');
+            const showRegister = document.getElementById('showRegister');
+            const showLogin = document.getElementById('showLogin');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+            
+            // Проверка авторизации при загрузке
+            checkAuth();
+            
+            // Открытие модальных окон
+            loginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                loginModal.style.display = 'flex';
+            });
+            
+            registerBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerModal.style.display = 'flex';
+            });
+            
+            // Закрытие модальных окон
+            closeLogin.addEventListener('click', function() {
+                loginModal.style.display = 'none';
+            });
+            
+            closeRegister.addEventListener('click', function() {
+                registerModal.style.display = 'none';
+            });
+            
+            // Переключение между модальными окнами
+            showRegister.addEventListener('click', function(e) {
+                e.preventDefault();
+                loginModal.style.display = 'none';
+                registerModal.style.display = 'flex';
+            });
+            
+            showLogin.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerModal.style.display = 'none';
+                loginModal.style.display = 'flex';
+            });
+            
+            // Обработка формы входа
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    loginModal.style.display = 'none';
+                    checkAuth();
+                    alert('Вы успешно вошли в систему!');
+                } else {
+                    alert('Неверный email или пароль');
+                }
+            });
+            
+            // Обработка формы регистрации
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userExists = users.some(u => u.email === email);
+                
+                if (userExists) {
+                    alert('Пользователь с таким email уже зарегистрирован');
+                    return;
+                }
+                
+                const newUser = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    password: password
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('currentUser', JSON.stringify(newUser));
+                registerModal.style.display = 'none';
+                checkAuth();
+                alert('Регистрация прошла успешно!');
+            });
+            
+            // Выход из системы
+            logoutBtn.addEventListener('click', function() {
+                localStorage.removeItem('currentUser');
+                checkAuth();
+            });
+            
+            // Функция проверки авторизации
+            function checkAuth() {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                
+                if (currentUser) {
+                    authButtons.style.display = 'none';
+                    userProfile.style.display = 'flex';
+                    userName.textContent = currentUser.name;
+                    userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+                } else {
+                    authButtons.style.display = 'flex';
+                    userProfile.style.display = 'none';
+                }
+            }
+            
+            // Закрытие модальных окон при клике вне их
+            window.addEventListener('click', function(e) {
+                if (e.target === loginModal) {
+                    loginModal.style.display = 'none';
+                }
+                if (e.target === registerModal) {
+                    registerModal.style.display = 'none';
+                }
+            });
+            
+            // Навигация между разделами
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    const sectionId = this.getAttribute('data-section');
+                    document.getElementById(sectionId).classList.add('active');
+                    
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            document.getElementById('home').classList.add('active');
+        });
+    </script>
+</body>
+</html>
